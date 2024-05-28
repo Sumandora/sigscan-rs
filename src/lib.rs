@@ -6,7 +6,7 @@
 //!
 //! ```rust
 //! use signature_scanner::Signature;
-//! 
+//!
 //! // Creation of a IDA byte signature:
 //! let ida_sig = Signature::ida("12 34");
 //! let string_sig = Signature::string("lo, wor", /*include_terminator: */false);
@@ -15,7 +15,7 @@
 //! ida_sig.next(&[0x00u8, /*matches here*/0x12, 0x34, 0x56, 0x12, 0x54, 0x12, 0x34, 0x00, 0x55, 0xAA]); // == Some(1)
 //! string_sig.next("Hello, world!".as_bytes()); // == Some(3)
 //! ```
-//! 
+//!
 
 #[derive(PartialEq, Debug)]
 pub struct PatternElement(pub Option<u8>);
@@ -118,6 +118,10 @@ impl Signature {
             .map(|(i, _)| i)
     }
 
+    pub fn matches(&self, slice: &[u8]) -> bool {
+        self.0 == slice
+    }
+
     pub fn get_elements(&self) -> &Vec<PatternElement> {
         &self.0
     }
@@ -214,5 +218,12 @@ mod tests {
                 .collect::<Vec<usize>>(),
             [3]
         );
+    }
+
+    #[test]
+    fn test_matches_behavior() {
+        assert!(Signature::ida("12 34").matches(&[0x12u8, 0x34]));
+
+        assert!(Signature::string("lo, wor", false).matches("lo, wor".as_bytes()));
     }
 }
